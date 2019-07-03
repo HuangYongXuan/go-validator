@@ -7,14 +7,14 @@ import (
 )
 
 type Validator struct {
-	data           map[string]interface{}
-	rules          []ruleStruct
-	failedRules    map[string]interface{}
-	errors         map[string]interface{}
-	customRules    interface{}
-	customMessages interface{}
-	customNames    interface{}
-	customValues   interface{}
+	data        map[string]interface{}
+	rules       []ruleStruct
+	failedRules map[string]interface{}
+	errors      map[string]interface{}
+	//customRules    interface{}
+	//customMessages interface{}
+	//customNames    interface{}
+	//customValues   interface{}
 }
 
 type ruleStruct struct {
@@ -210,6 +210,18 @@ func findRuleMethod(rule ruleParamsStruct) (reflect.Value, bool) {
 	return method, method.IsValid()
 }
 
+func (c *Validator) ValidateSometimes(params validatorParams) bool {
+	return true
+}
+
+func (c *Validator) ValidateBail(params validatorParams) bool {
+	return true
+}
+
+func (c *Validator) shouldStopValidating(params validatorParams) bool {
+	return true
+}
+
 func (c *Validator) ValidateRequired(params validatorParams) bool {
 	if params.value == nil {
 		return false
@@ -232,18 +244,162 @@ func (c *Validator) ValidateRequired(params validatorParams) bool {
 	return true
 }
 
+func (c *Validator) ValidatePresent(params validatorParams) bool {
+	return true
+}
+
+func (c *Validator) ValidateFilled(params validatorParams) bool {
+	return true
+}
+
+func (c *Validator) ValidateRequiredWith(params validatorParams) bool {
+	return true
+}
+
+func (c *Validator) ValidateRequiredWithAll(params validatorParams) bool {
+	return true
+}
+
+func (c *Validator) ValidateRequiredWithout(params validatorParams) bool {
+	return true
+}
+
+func (c *Validator) ValidateRequiredWithoutAll(params validatorParams) bool {
+	return true
+}
+
+func (c *Validator) ValidateRequiredIf(params validatorParams) bool {
+	return true
+}
+
+func (c *Validator) ValidateRequiredUnless(params validatorParams) bool {
+	return true
+}
+
+func (c *Validator) ValidateMatch(params validatorParams) bool {
+	return true
+}
+
+func (c *Validator) ValidateRegex(params validatorParams) bool {
+	return true
+}
+
+func (c *Validator) ValidateAccepted(params validatorParams) bool {
+	return true
+}
+
+func (c *Validator) ValidateArray(params validatorParams) bool {
+	return true
+}
+
+func (c *Validator) ValidateConfirmed(params validatorParams) bool {
+	return true
+}
+
+func (c *Validator) ValidateSame(params validatorParams) bool {
+	return true
+}
+
+func (c *Validator) ValidateDifferent(params validatorParams) bool {
+	return true
+}
+
+func (c *Validator) ValidateDigits(params validatorParams) bool {
+	return true
+}
+
+func (c *Validator) ValidateDigitsBetween(params validatorParams) bool {
+	return true
+}
+
+func (c *Validator) ValidateSize(params validatorParams) bool {
+	return true
+}
+
+func (c *Validator) ValidateBetween(params validatorParams) bool {
+	return true
+}
+
 func (c *Validator) ValidateMin(params validatorParams) bool {
 	return true
 }
 
+func (c *Validator) ValidateMax(params validatorParams) bool {
+	return true
+}
+
+func (c *Validator) ValidateIn(params validatorParams) bool {
+	return true
+}
+
+func (c *Validator) ValidateNotIn(params validatorParams) bool {
+	return true
+}
+
+func (c *Validator) ValidateNumeric(params validatorParams) bool {
+	return true
+}
+
 func (c *Validator) ValidateInteger(params validatorParams) bool {
+	t := InterfaceType(params.value)
+	if !strings.Contains(t, "int") {
+		return false
+	}
+	return true
+}
+
+func (c *Validator) ValidateString(params validatorParams) bool {
+	return true
+}
+
+func (c *Validator) ValidateEmail(params validatorParams) bool {
+	return true
+}
+
+func (c *Validator) ValidateIp(params validatorParams) bool {
+	return true
+}
+
+func (c *Validator) ValidateUrl(params validatorParams) bool {
+	return true
+}
+
+func (c *Validator) ValidateAlpha(params validatorParams) bool {
+	return true
+}
+
+func (c *Validator) ValidateAlphaNum(params validatorParams) bool {
+	return true
+}
+
+func (c *Validator) ValidateBefore(params validatorParams) bool {
+	return true
+}
+
+func (c *Validator) ValidateBeforeOrEqual(params validatorParams) bool {
+	return true
+}
+
+func (c *Validator) ValidateAfter(params validatorParams) bool {
+	return true
+}
+
+func (c *Validator) ValidateAfterOrEqual(params validatorParams) bool {
+	return true
+}
+
+func (c *Validator) ValidateDate(params validatorParams) bool {
+	return true
+}
+
+func (c *Validator) ValidateBoolean(params validatorParams) bool {
+	return true
+}
+
+func (c *Validator) ValidateJson(params validatorParams) bool {
 	return true
 }
 
 func (c *Validator) ValidateActiveUrl(params validatorParams) bool {
-	return true
-}
-
-func (c *Validator) ValidateMax(params validatorParams) bool {
 	return true
 }

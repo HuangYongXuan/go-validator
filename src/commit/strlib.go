@@ -89,3 +89,17 @@ func InterfaceType(param interface{}) string {
 		return "default"
 	}
 }
+
+func StringArrayIndex(array []string, value string) (bool, int) {
+	length := len(array)
+	b := false
+	index := -1
+	for i := 0; i < length; i++ {
+		if array[i] == value {
+			b = true
+			index = i
+			break
+		}
+	}
+	return b, index
+}
