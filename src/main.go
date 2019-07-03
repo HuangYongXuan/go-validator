@@ -25,6 +25,7 @@ func main() {
 	rules["age"] = "required|integer|min:0|max:120"
 
 	validator := commit.ValidatorMake(data, rules)
-	fmt.Println(validator.Fails())
-	fmt.Println(validator.GetErrors())
+	if validator.Fails() {
+		fmt.Println(validator.GetErrors())
+	}
 }
