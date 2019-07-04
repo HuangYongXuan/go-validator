@@ -1,6 +1,9 @@
 package commit
 
-import "strings"
+import (
+	"reflect"
+	"strings"
+)
 
 // snake string, XxYy to xx_yy , XxYY to xx_yy
 func SnakeString(s string) string {
@@ -45,49 +48,11 @@ func CamelString(s string) string {
 	return string(data[:])
 }
 
-func InterfaceType(param interface{}) string {
-	switch param.(type) {
-	case string:
-		return "string"
-	case float64:
-		return "float64"
-	case float32:
-		return "float32"
-	case bool:
-		return "bool"
-	case struct{}:
-		return "struct"
-	case int:
-		return "int"
-	case int8:
-		return "int8"
-	case int16:
-		return "int16"
-	case int32:
-		return "int32"
-	case int64:
-		return "int64"
-	case uint8:
-		return "uint8"
-	case uint16:
-		return "uint16"
-	case uint32:
-		return "uint32"
-	case uint64:
-		return "uint64"
-	case complex64:
-		return "complex64"
-	case complex128:
-		return "complex128"
-	case uint:
-		return "uint"
-	case uintptr:
-		return "uintptr"
-	case []string:
-		return "array"
-	default:
-		return "default"
+func GetInterfaceType(param interface{}) string {
+	if param == nil {
+		return ""
 	}
+	return reflect.TypeOf(param).String()
 }
 
 func StringArrayIndex(array []string, value string) (bool, int) {
@@ -102,4 +67,35 @@ func StringArrayIndex(array []string, value string) (bool, int) {
 		}
 	}
 	return b, index
+}
+
+func InterfaceIsInteger(param interface{}) bool {
+	if param == nil {
+		return false
+	}
+
+	types := []string{"uint8", "uint16", "uint32", "uint64", "int8", "int16", "int32", "int64", "int", "uint"}
+	valType := GetInterfaceType(param)
+	b, _ := StringArrayIndex(types, valType)
+	return b
+}
+
+func InterfaceIsNumeric(param interface{}) bool {
+	if param == nil {
+		return false
+	}
+
+	types := []string{"uint8", "uint16", "uint32", "uint64", "int8", "int16", "int32", "int64", "int", "uint", "float32", "float64", "complex64", "complex128"}
+	valType := GetInterfaceType(param)
+
+	b, _ := StringArrayIndex(types, valType)
+	return b
+}
+
+func IsArray(param interface{}) bool {
+	if param == nil {
+		return false
+	}
+	ty := reflect.ValueOf(param).Kind().String()
+	return ty == "slice" || ty == "map"
 }

@@ -15,7 +15,7 @@ func init() {
 	Message["before_or_equal"] = "必须要等于 :date 或更早。"
 
 	between := make(map[string]string)
-	between["numeric"] = "必须介于 :min - :max 之间。"
+	between["numeric"] = ":attr 必须介于 :min - :max 之间。"
 	between["file"] = "必须介于 :min - :max kb 之间。"
 	between["string"] = "必须介于 :min - :max 个字符之间。"
 	between["array"] = "必须只有 :min - :max 个单元。"
@@ -35,7 +35,7 @@ func init() {
 	Message["file"] = "必须是文件。"
 	Message["filled"] = "不能为空。"
 	Message["image"] = "必须是图片。"
-	Message["in"] = "已选的属性 非法。"
+	Message["in"] = "已选的属性 :attr 非法。"
 	Message["in_array"] = "没有在 :other 中。"
 	Message["integer"] = "必须是整数。"
 	Message["ip"] = "必须是有效的 IP 地址。"
@@ -58,9 +58,10 @@ func init() {
 	min["string"] = "至少为 :min 个字符。"
 	min["array"] = "至少有 :min 个单元。"
 	Message["min"] = min
-	Message["not_in"] = "已选的属性 非法。"
+	Message["not_in"] = "已选的属性 :attr 非法。"
 	Message["numeric"] = "必须是一个数字。"
 	Message["present"] = "必须存在。"
+	Message["match"] = "格式不匹配。"
 	Message["regex"] = "格式不正确。"
 	Message["required"] = "不能为空。"
 	Message["required_if"] = "当 :other 为 :value 时 不能为空。"
