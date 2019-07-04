@@ -14,7 +14,7 @@
 	rules["Name"] = "required|min:0|integer|active_url"
 	rules["age"] = "required|integer|min:0|max:120"
 
-	validator := commit.ValidatorMake(data, rules)
+	validator := validate.ValidatorMake(data, rules)
 	if validator.Fails() {
 		fmt.Println(validator.GetErrors())
 	}   
