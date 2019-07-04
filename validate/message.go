@@ -1,4 +1,4 @@
-package commit
+package validate
 
 var Message = make(map[string]interface{})
 

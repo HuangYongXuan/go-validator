@@ -1,4 +1,4 @@
-package commit
+package validate
 
 import (
 	"encoding/json"
