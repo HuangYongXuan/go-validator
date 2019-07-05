@@ -58,12 +58,19 @@ func init() {
 	}
 }
 
-func Make(data map[string]interface{}, rules map[string]interface{}, customMessages map[string]interface{}, customNames map[string]string) Validator {
+func MakeAndCustom(data map[string]interface{}, rules map[string]interface{}, customMessages map[string]interface{}, customNames map[string]string) Validator {
 	var validator Validator
 	validator.data = data
 	validator.rules = validator.parseRules(rules)
 	validator.customMessages = customMessages
 	validator.customNames = customNames
+	return validator
+}
+
+func Make(data map[string]interface{}, rules map[string]interface{}) Validator {
+	var validator Validator
+	validator.data = data
+	validator.rules = validator.parseRules(rules)
 	return validator
 }
 
