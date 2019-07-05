@@ -1,4 +1,4 @@
-package validate
+package validator
 
 import (
 	"encoding/json"
@@ -15,12 +15,8 @@ import (
 type Validator struct {
 	data        map[string]interface{}
 	rules       []ruleStruct
-	failedRules map[string]interface{}
 	errors      map[string]interface{}
-	//customRules    interface{}
-	//customMessages interface{}
-	//customNames    interface{}
-	//customValues   interface{}
+	customNames interface{}
 }
 
 type ruleStruct struct {
@@ -61,7 +57,7 @@ func init() {
 	}
 }
 
-func ValidatorMake(data map[string]interface{}, rules map[string]interface{}) Validator {
+func Make(data map[string]interface{}, rules map[string]interface{}) Validator {
 	var validator Validator
 	validator.data = data
 	validator.rules = validator.parseRules(rules)
@@ -120,7 +116,6 @@ func (*Validator) titleCase(str string) string {
 
 func (c *Validator) passes() bool {
 	c.errors = make(map[string]interface{})
-	c.failedRules = make(map[string]interface{})
 
 	for _, rule := range c.rules {
 		var name = rule.name

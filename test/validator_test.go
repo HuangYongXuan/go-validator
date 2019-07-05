@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/Ysll233/go-validator/validate"
+	"github.com/Ysll233/go-validator/validator"
 )
 
 func TestValidateMatch(t *testing.T) {
@@ -14,7 +14,7 @@ func TestValidateMatch(t *testing.T) {
 	rules := make(map[string]interface{})
 	rules["name"] = []string{"nullable", "match:^1([38][0-9]|14[57]|5[^4])\\d{8}$"}
 
-	v := validate.ValidatorMake(data, rules)
+	v := validator.Make(data, rules)
 	v.Fails()
 	fmt.Println(v.GetErrors())
 }
@@ -25,7 +25,7 @@ func TestValidateAccepted(t *testing.T) {
 	rules := make(map[string]interface{})
 	rules["name"] = []string{"nullable", "accepted"}
 
-	v := validate.ValidatorMake(data, rules)
+	v := validator.Make(data, rules)
 	v.Fails()
 	fmt.Println(v.GetErrors())
 }
@@ -36,7 +36,7 @@ func TestValidateArray(t *testing.T) {
 	rules := make(map[string]interface{})
 	rules["name"] = []string{"nullable", "array"}
 
-	v := validate.ValidatorMake(data, rules)
+	v := validator.Make(data, rules)
 	v.Fails()
 	fmt.Println(v.GetErrors())
 }
@@ -48,7 +48,7 @@ func TestValidateConfirmed(t *testing.T) {
 	rules := make(map[string]interface{})
 	rules["name"] = []string{"required", "confirmed"}
 
-	v := validate.ValidatorMake(data, rules)
+	v := validator.Make(data, rules)
 	v.Fails()
 	fmt.Println(v.GetErrors())
 }
@@ -62,7 +62,7 @@ func TestValidateBetween(t *testing.T) {
 	rules["name"] = []string{"required", "between:10,100"}
 	rules["age"] = []string{"required", "min:11", "max:100"}
 
-	v := validate.ValidatorMake(data, rules)
+	v := validator.Make(data, rules)
 	v.Fails()
 	fmt.Println(v.GetErrors())
 }
@@ -73,7 +73,7 @@ func TestValidateIn(t *testing.T) {
 	rules := make(map[string]interface{})
 	rules["name"] = []string{"required", "in:asc,bcc"}
 
-	v := validate.ValidatorMake(data, rules)
+	v := validator.Make(data, rules)
 	v.Fails()
 	fmt.Println(v.GetErrors())
 }
@@ -84,7 +84,7 @@ func TestValidateNotIn(t *testing.T) {
 	rules := make(map[string]interface{})
 	rules["name"] = []string{"required", "not_in:asc,bcc"}
 
-	v := validate.ValidatorMake(data, rules)
+	v := validator.Make(data, rules)
 	v.Fails()
 	fmt.Println(v.GetErrors())
 }
@@ -95,7 +95,7 @@ func TestValidateNumeric(t *testing.T) {
 	rules := make(map[string]interface{})
 	rules["name"] = []string{"required", "numeric"}
 
-	v := validate.ValidatorMake(data, rules)
+	v := validator.Make(data, rules)
 	v.Fails()
 	fmt.Println(v.GetErrors())
 }
@@ -106,7 +106,7 @@ func TestValidateInteger(t *testing.T) {
 	rules := make(map[string]interface{})
 	rules["name"] = []string{"required", "integer"}
 
-	v := validate.ValidatorMake(data, rules)
+	v := validator.Make(data, rules)
 	v.Fails()
 	fmt.Println(v.GetErrors())
 }
@@ -117,7 +117,7 @@ func TestValidateString(t *testing.T) {
 	rules := make(map[string]interface{})
 	rules["name"] = []string{"required", "string"}
 
-	v := validate.ValidatorMake(data, rules)
+	v := validator.Make(data, rules)
 	v.Fails()
 	fmt.Println(v.GetErrors())
 }
@@ -128,7 +128,7 @@ func TestValidateEmail(t *testing.T) {
 	rules := make(map[string]interface{})
 	rules["name"] = []string{"required", "email"}
 
-	v := validate.ValidatorMake(data, rules)
+	v := validator.Make(data, rules)
 	v.Fails()
 	fmt.Println(v.GetErrors())
 }
@@ -139,7 +139,7 @@ func TestValidateIp(t *testing.T) {
 	rules := make(map[string]interface{})
 	rules["ip"] = []string{"required", "ip"}
 
-	v := validate.ValidatorMake(data, rules)
+	v := validator.Make(data, rules)
 	v.Fails()
 	fmt.Println(v.GetErrors())
 }
@@ -150,7 +150,7 @@ func TestValidateUrl(t *testing.T) {
 	rules := make(map[string]interface{})
 	rules["url"] = []string{"required", "url"}
 
-	v := validate.ValidatorMake(data, rules)
+	v := validator.Make(data, rules)
 	v.Fails()
 	fmt.Println(v.GetErrors())
 }
@@ -161,7 +161,7 @@ func TestValidateAlpha(t *testing.T) {
 	rules := make(map[string]interface{})
 	rules["data"] = []string{"required", "Alpha"}
 
-	v := validate.ValidatorMake(data, rules)
+	v := validator.Make(data, rules)
 	v.Fails()
 	fmt.Println(v.GetErrors())
 }
@@ -173,7 +173,7 @@ func TestValidateAlphaNum(t *testing.T) {
 	rules := make(map[string]interface{})
 	rules["data"] = []string{"required", "alpha_num"}
 
-	v := validate.ValidatorMake(data, rules)
+	v := validator.Make(data, rules)
 	v.Fails()
 	fmt.Println(v.GetErrors())
 }
@@ -186,7 +186,7 @@ func TestValidateJson(t *testing.T) {
 	rules := make(map[string]interface{})
 	rules["data"] = []string{"required", "json"}
 
-	v := validate.ValidatorMake(data, rules)
+	v := validator.Make(data, rules)
 	v.Fails()
 	fmt.Println(v.GetErrors())
 }
@@ -197,7 +197,7 @@ func TestValidateActiveUrl(t *testing.T) {
 	rules := make(map[string]interface{})
 	rules["data"] = []string{"required", "active_url"}
 
-	v := validate.ValidatorMake(data, rules)
+	v := validator.Make(data, rules)
 	v.Fails()
 	fmt.Println(v.GetErrors())
 }

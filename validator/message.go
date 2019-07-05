@@ -1,4 +1,4 @@
-package validate
+package validator
 
 var Message = make(map[string]interface{})
 
