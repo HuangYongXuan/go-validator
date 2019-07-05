@@ -13,10 +13,11 @@ import (
 )
 
 type Validator struct {
-	data        map[string]interface{}
-	rules       []ruleStruct
-	errors      map[string]interface{}
-	customNames interface{}
+	data           map[string]interface{}
+	rules          []ruleStruct
+	errors         map[string]interface{}
+	customMessages map[string]interface{}
+	customNames    map[string]string
 }
 
 type ruleStruct struct {
@@ -57,10 +58,12 @@ func init() {
 	}
 }
 
-func Make(data map[string]interface{}, rules map[string]interface{}) Validator {
+func Make(data map[string]interface{}, rules map[string]interface{}, customMessages map[string]interface{}, customNames map[string]string) Validator {
 	var validator Validator
 	validator.data = data
 	validator.rules = validator.parseRules(rules)
+	validator.customMessages = customMessages
+	validator.customNames = customNames
 	return validator
 }
 
@@ -241,9 +244,10 @@ func (c *Validator) doReplacements(msg, name string, rule ruleParamsStruct) stri
 		return ""
 	}
 	// 获取名称映射
-	msg = strings.ReplaceAll(msg, ":ATTR", name)
-	msg = strings.ReplaceAll(msg, ":Attr", c.titleCase(name))
-	msg = strings.ReplaceAll(msg, ":attr", name)
+	attr := c.getAttr(name)
+	msg = strings.ReplaceAll(msg, ":ATTR", attr)
+	msg = strings.ReplaceAll(msg, ":Attr", attr)
+	msg = strings.ReplaceAll(msg, ":attr", attr)
 
 	reg, _ := regexp.Compile(":[a-zA-Z]{3,6}")
 
@@ -256,28 +260,49 @@ func (c *Validator) doReplacements(msg, name string, rule ruleParamsStruct) stri
 	return msg
 }
 
+func (c *Validator) getAttr(name string) string {
+	attr := c.customNames[name]
+	fmt.Println("attr:", attr)
+	if attr != "" {
+		return attr
+	}
+	return name
+}
+
 func (c *Validator) getErrorMessage(name string, rule ruleParamsStruct) string {
 	key := SnakeString(rule.name)
-	if GetInterfaceType(Message[key]) == "string" {
-		message, ok := Message[key].(string)
+	message, b := c.getErrorMessages(key, name, c.customMessages)
+	if b {
+		return message
+	}
+	message, b = c.getErrorMessages(key, name, Message)
+	if b {
+		return message
+	}
+	return key + " Not error message"
+}
+
+func (c *Validator) getErrorMessages(key, name string, messages map[string]interface{}) (string, bool) {
+	if GetInterfaceType(messages[key]) == "string" {
+		message, ok := messages[key].(string)
 		if ok {
-			return message
+			return message, true
 		}
-	} else if IsArray(Message[key]) {
-		msg := Message[key].(map[string]string)
+	} else if IsArray(messages[key]) {
+		msg := messages[key].(map[string]string)
 		value := c.data[name]
 
 		if InterfaceIsInteger(value) {
-			return msg["numeric"]
+			return msg["numeric"], true
 		} else if InterfaceIsNumeric(value) {
-			return msg["numeric"]
+			return msg["numeric"], true
 		} else if IsArray(value) {
-			return msg["array"]
+			return msg["array"], true
 		} else if GetInterfaceType(value) == "string" {
-			return msg["string"]
+			return msg["string"], true
 		}
 	}
-	return key + " Not error message"
+	return "", false
 }
 
 func (c *Validator) hasError(name string) bool {
