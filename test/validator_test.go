@@ -325,15 +325,41 @@ func TestValidateAlphaNum(t *testing.T) {
 }
 
 func TestValidateAlphaDash(t *testing.T) {
-	// TODO
+	data := make(map[string]interface{})
+	data["data"] = "123213123~!@#$%^&*("
+	rules := make(map[string]interface{})
+	rules["data"] = []string{"required", "alpha_dash"}
+	v := validator.Make(data, rules)
+	v.Fails()
+	fmt.Println(v.GetErrors())
 }
 
 func TestValidateBefore(t *testing.T) {
-	// TODO
+	data := make(map[string]interface{})
+	data["data"] = "2019-12-25 12:00:00"
+	data["data2"] = "1562396373"
+	data["data3"] = 1562396373
+	rules := make(map[string]interface{})
+	rules["data"] = []string{"required", "before:2019-12-25 12:00:00"}
+	rules["data2"] = []string{"required", "before:2019-04-25 12:00:00"}
+	rules["data3"] = []string{"required", "before:2019-04-25 12:00:00"}
+	v := validator.Make(data, rules)
+	v.Fails()
+	fmt.Println(v.GetErrors())
 }
 
 func TestValidateBeforeOrEqual(t *testing.T) {
-	// TODO
+	data := make(map[string]interface{})
+	data["data"] = "2019-12-25 12:00:00"
+	data["data2"] = "1562396373"
+	data["data3"] = 1562396373
+	rules := make(map[string]interface{})
+	rules["data"] = []string{"required", "before_or_equal:2019-12-25 12:00:00"}
+	rules["data2"] = []string{"required", "before_or_equal:2019-04-25 12:00:00"}
+	rules["data3"] = []string{"required", "before_or_equal:2019-04-25 12:00:00"}
+	v := validator.Make(data, rules)
+	v.Fails()
+	fmt.Println(v.GetErrors())
 }
 
 func TestValidateAfter(t *testing.T) {

@@ -10,6 +10,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type Validator struct {
@@ -19,6 +20,8 @@ type Validator struct {
 	customMessages map[string]interface{}
 	customNames    map[string]string
 }
+
+const time_layout = "2006-01-02 15:04:05"
 
 type ruleStruct struct {
 	name  string
@@ -101,7 +104,7 @@ func (c *Validator) parseItemRulesArray(itemRules []string) []ruleParamsStruct {
 
 	for _, v := range itemRules {
 		var rule = strings.TrimSpace(v)
-		args := strings.Split(rule, ":")
+		args := strings.SplitN(rule, ":", 2)
 		var params []string
 		if args[0] == "regex" {
 			params = []string{args[1]}
@@ -215,8 +218,9 @@ func (c *Validator) validate(name string, rule ruleParamsStruct) {
 	method, ok := findRuleMethod(rule)
 	if !ok {
 		fmt.Println("验证方法 Validate" + rule.name + " 无法找到")
+		c.addFailure(name, rule)
 	} else {
-		data := validatorParams{
+		data := &validatorParams{
 			name:      name,
 			value:     value,
 			params:    rule.params,
@@ -259,7 +263,9 @@ func (c *Validator) doReplacements(msg, name string, rule ruleParamsStruct) stri
 	reg, _ := regexp.Compile(":[a-zA-Z]{3,6}")
 
 	data := reg.FindAllString(msg, 2)
-
+	if len(data) < 1 || len(rule.params) < 1 {
+		return msg
+	}
 	for key, value := range data {
 		msg = strings.Replace(msg, value, rule.params[key], 1)
 	}
@@ -333,11 +339,11 @@ func findRuleMethod(rule ruleParamsStruct) (reflect.Value, bool) {
 	return method, method.IsValid()
 }
 
-func (c *Validator) ValidateSometimes(params validatorParams) bool {
+func (c *Validator) ValidateSometimes(params *validatorParams) bool {
 	return true
 }
 
-func (c *Validator) ValidateBail(params validatorParams) bool {
+func (c *Validator) ValidateBail(params *validatorParams) bool {
 	return true
 }
 
@@ -348,7 +354,7 @@ func (c *Validator) shouldStopValidating(name string) bool {
 	return c.hasError(name)
 }
 
-func (c *Validator) ValidateRequired(params validatorParams) bool {
+func (c *Validator) ValidateRequired(params *validatorParams) bool {
 	if params.value == nil {
 		return false
 	}
@@ -370,11 +376,11 @@ func (c *Validator) ValidateRequired(params validatorParams) bool {
 	return true
 }
 
-func (c *Validator) ValidatePresent(params validatorParams) bool {
+func (c *Validator) ValidatePresent(params *validatorParams) bool {
 	return c.data[params.name] != nil
 }
 
-func (c *Validator) ValidateFilled(params validatorParams) bool {
+func (c *Validator) ValidateFilled(params *validatorParams) bool {
 	if c.hasData(params.name) {
 		return c.ValidateRequired(params)
 	}
@@ -388,7 +394,7 @@ func (c *Validator) anyFailingRequired(names []string) bool {
 		params.name = value
 		params.value = c.getValue(value)
 		params.params = []string{}
-		if !c.ValidateRequired(params) {
+		if !c.ValidateRequired(&params) {
 			result = true
 			break
 		}
@@ -403,7 +409,7 @@ func (c *Validator) allFailingRequired(names []string) bool {
 		params.name = name
 		params.value = c.getValue(name)
 		params.params = []string{}
-		if c.ValidateRequired(params) {
+		if c.ValidateRequired(&params) {
 			result = false
 			break
 		}
@@ -411,35 +417,35 @@ func (c *Validator) allFailingRequired(names []string) bool {
 	return result
 }
 
-func (c *Validator) ValidateRequiredWith(params validatorParams) bool {
+func (c *Validator) ValidateRequiredWith(params *validatorParams) bool {
 	if c.allFailingRequired(params.params) {
 		return c.ValidateRequired(params)
 	}
 	return true
 }
 
-func (c *Validator) ValidateRequiredWithAll(params validatorParams) bool {
+func (c *Validator) ValidateRequiredWithAll(params *validatorParams) bool {
 	if !c.anyFailingRequired(params.params) {
 		return c.ValidateRequired(params)
 	}
 	return true
 }
 
-func (c *Validator) ValidateRequiredWithout(params validatorParams) bool {
+func (c *Validator) ValidateRequiredWithout(params *validatorParams) bool {
 	if c.anyFailingRequired(params.params) {
 		return c.ValidateRequired(params)
 	}
 	return true
 }
 
-func (c *Validator) ValidateRequiredWithoutAll(params validatorParams) bool {
+func (c *Validator) ValidateRequiredWithoutAll(params *validatorParams) bool {
 	if c.allFailingRequired(params.params) {
 		return c.ValidateRequired(params)
 	}
 	return true
 }
 
-func (c *Validator) ValidateRequiredIf(params validatorParams) bool {
+func (c *Validator) ValidateRequiredIf(params *validatorParams) bool {
 	err := c.requireParameterCount(2, params.params, "required_if")
 	if err != nil {
 		return false
@@ -461,7 +467,7 @@ func (c *Validator) ValidateRequiredIf(params validatorParams) bool {
 	return true
 }
 
-func (c *Validator) ValidateRequiredUnless(params validatorParams) bool {
+func (c *Validator) ValidateRequiredUnless(params *validatorParams) bool {
 	err := c.requireParameterCount(2, params.params, "required_unless")
 	if err != nil {
 		return false
@@ -482,7 +488,7 @@ func (c *Validator) ValidateRequiredUnless(params validatorParams) bool {
 	return true
 }
 
-func (c *Validator) ValidateMatch(params validatorParams) bool {
+func (c *Validator) ValidateMatch(params *validatorParams) bool {
 	if params.value == nil {
 		return false
 	}
@@ -494,11 +500,11 @@ func (c *Validator) ValidateMatch(params validatorParams) bool {
 	return b
 }
 
-func (c *Validator) ValidateRegex(params validatorParams) bool {
+func (c *Validator) ValidateRegex(params *validatorParams) bool {
 	return c.ValidateMatch(params)
 }
 
-func (c *Validator) ValidateAccepted(params validatorParams) bool {
+func (c *Validator) ValidateAccepted(params *validatorParams) bool {
 	if GetInterfaceType(params.value) == "bool" {
 		return params.value.(bool)
 	} else if GetInterfaceType(params.value) == "string" {
@@ -515,19 +521,19 @@ func (c *Validator) ValidateAccepted(params validatorParams) bool {
 	return false
 }
 
-func (c *Validator) ValidateArray(params validatorParams) bool {
+func (c *Validator) ValidateArray(params *validatorParams) bool {
 	if IsArray(params.value) {
 		return true
 	}
 	return false
 }
 
-func (c *Validator) ValidateConfirmed(params validatorParams) bool {
+func (c *Validator) ValidateConfirmed(params *validatorParams) bool {
 	params.params = []string{params.name + "_confirmation"}
 	return c.ValidateSame(params)
 }
 
-func (c *Validator) ValidateSame(params validatorParams) bool {
+func (c *Validator) ValidateSame(params *validatorParams) bool {
 	err := c.requireParameterCount(1, params.params, "same")
 	if err != nil {
 		return false
@@ -538,7 +544,7 @@ func (c *Validator) ValidateSame(params validatorParams) bool {
 	return other != nil && params.value == other
 }
 
-func (c *Validator) ValidateDifferent(params validatorParams) bool {
+func (c *Validator) ValidateDifferent(params *validatorParams) bool {
 	err := c.requireParameterCount(1, params.params, "different")
 	if err != nil {
 		return false
@@ -549,7 +555,7 @@ func (c *Validator) ValidateDifferent(params validatorParams) bool {
 	return other != nil && params.value != other
 }
 
-func (c *Validator) ValidateDigits(params validatorParams) bool {
+func (c *Validator) ValidateDigits(params *validatorParams) bool {
 	err := c.requireParameterCount(1, params.params, "digits")
 	if err != nil {
 		return false
@@ -559,7 +565,7 @@ func (c *Validator) ValidateDigits(params validatorParams) bool {
 	return c.ValidateNumeric(params) && len(str) == length
 }
 
-func (c *Validator) ValidateDigitsBetween(params validatorParams) bool {
+func (c *Validator) ValidateDigitsBetween(params *validatorParams) bool {
 	err := c.requireParameterCount(2, params.params, "digits_between")
 	if err != nil {
 		return false
@@ -567,7 +573,7 @@ func (c *Validator) ValidateDigitsBetween(params validatorParams) bool {
 	return true
 }
 
-func (c *Validator) ValidateSize(params validatorParams) bool {
+func (c *Validator) ValidateSize(params *validatorParams) bool {
 	err := c.requireParameterCount(1, params.params, "size")
 	if err != nil {
 		return false
@@ -575,7 +581,7 @@ func (c *Validator) ValidateSize(params validatorParams) bool {
 	return true
 }
 
-func (c *Validator) ValidateBetween(params validatorParams) bool {
+func (c *Validator) ValidateBetween(params *validatorParams) bool {
 	err := c.requireParameterCount(2, params.params, "between")
 	if err != nil {
 		return false
@@ -590,7 +596,7 @@ func (c *Validator) ValidateBetween(params validatorParams) bool {
 	return min <= paramSize && paramSize <= max
 }
 
-func (c *Validator) ValidateMin(params validatorParams) bool {
+func (c *Validator) ValidateMin(params *validatorParams) bool {
 	err := c.requireParameterCount(1, params.params, "min")
 	if err != nil {
 		return false
@@ -603,7 +609,7 @@ func (c *Validator) ValidateMin(params validatorParams) bool {
 	return c.getSize(params.name, params.value) >= size
 }
 
-func (c *Validator) ValidateMax(params validatorParams) bool {
+func (c *Validator) ValidateMax(params *validatorParams) bool {
 	err := c.requireParameterCount(1, params.params, "max")
 	if err != nil {
 		return false
@@ -634,7 +640,7 @@ func (c *Validator) getSize(name string, value interface{}) int {
 	return 0
 }
 
-func (c *Validator) ValidateIn(params validatorParams) bool {
+func (c *Validator) ValidateIn(params *validatorParams) bool {
 	value, err := params.value.(string)
 	if !err {
 		return false
@@ -644,28 +650,40 @@ func (c *Validator) ValidateIn(params validatorParams) bool {
 	return b
 }
 
-func (c *Validator) ValidateNotIn(params validatorParams) bool {
+func (c *Validator) ValidateNotIn(params *validatorParams) bool {
 	return !c.ValidateIn(params)
 }
 
-func (c *Validator) ValidateNumeric(params validatorParams) bool {
-	return InterfaceIsNumeric(params.value)
+func (c *Validator) ValidateNumeric(params *validatorParams) bool {
+	if GetInterfaceType(params.value) == "string" {
+		params.params = []string{`^-?[1-9]\d*$`}
+		result := c.ValidateMatch(params)
+		params.value, _ = strconv.ParseFloat(params.value.(string), 32)
+		return result
+	}
+	return InterfaceIsNumeric(params.params)
 }
 
-func (c *Validator) ValidateInteger(params validatorParams) bool {
-	return InterfaceIsInteger(params.value)
+func (c *Validator) ValidateInteger(params *validatorParams) bool {
+	if GetInterfaceType(params.value) == "string" {
+		params.params = []string{`^[1-9]\d*\.\d*|0\.\d*[1-9]\d*$`}
+		result := c.ValidateMatch(params)
+		params.value, _ = strconv.Atoi(params.value.(string))
+		return result
+	}
+	return InterfaceIsInteger(params.params)
 }
 
-func (c *Validator) ValidateString(params validatorParams) bool {
+func (c *Validator) ValidateString(params *validatorParams) bool {
 	return GetInterfaceType(params.value) == "string"
 }
 
-func (c *Validator) ValidateEmail(params validatorParams) bool {
+func (c *Validator) ValidateEmail(params *validatorParams) bool {
 	params.params = []string{`\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*`}
 	return c.ValidateMatch(params)
 }
 
-func (c *Validator) ValidateIp(params validatorParams) bool {
+func (c *Validator) ValidateIp(params *validatorParams) bool {
 	ipv4, b := params.value.(string)
 	if !b {
 		return false
@@ -674,17 +692,17 @@ func (c *Validator) ValidateIp(params validatorParams) bool {
 	return net.ParseIP(ipv4) != nil
 }
 
-func (c *Validator) ValidateUrl(params validatorParams) bool {
+func (c *Validator) ValidateUrl(params *validatorParams) bool {
 	params.params = []string{`(https?|ftp):\/\/[^\s\/$.?#].[^\s]*`}
 	return c.ValidateMatch(params)
 }
 
-func (c *Validator) ValidateAlpha(params validatorParams) bool {
+func (c *Validator) ValidateAlpha(params *validatorParams) bool {
 	params.params = []string{`^[\pL\pM]+$`}
 	return c.ValidateMatch(params)
 }
 
-func (c *Validator) ValidateAlphaNum(params validatorParams) bool {
+func (c *Validator) ValidateAlphaNum(params *validatorParams) bool {
 	params.params = []string{`^[\pL\pM\pN]+$`}
 	return c.ValidateMatch(params)
 }
@@ -692,36 +710,101 @@ func (c *Validator) ValidateAlphaNum(params validatorParams) bool {
 /**
 验证属性是否仅包含字母数字字符，短划线和下划线。
 */
-func (c *Validator) ValidateAlphaDash(params validatorParams) bool {
+func (c *Validator) ValidateAlphaDash(params *validatorParams) bool {
 	params.params = []string{`^[\pL\pM\pN_-]+$`}
 	return c.ValidateMatch(params)
 }
 
-func (c *Validator) ValidateBefore(params validatorParams) bool {
+func parseData(date interface{}) string {
+	var value string
+	if InterfaceIsNumeric(date) {
+		timestamp := int64(date.(int))
+		value = time.Unix(timestamp, 0).Format(time_layout)
+	} else if GetInterfaceType(date) == "string" {
+		value = date.(string)
+		b, err := regexp.MatchString("^[1-9]\\d*$", value)
+		if err == nil && b == true {
+			timestamp, err := strconv.ParseInt(value, 10, 64)
+			if err == nil {
+				value = time.Unix(timestamp, 0).Format(time_layout)
+			}
+		}
+	} else {
+		return ""
+	}
+	return value
+}
+
+func (c *Validator) ValidateBefore(params *validatorParams) bool {
 	err := c.requireParameterCount(1, params.params, "before")
+	if err != nil {
+		fmt.Println(err)
+		return false
+	}
+	value := parseData(params.value)
+	paramDate := params.params[0]
+
+	times, err := parseStringsToDate(time_layout, []string{value, paramDate})
 	if err != nil {
 		return false
 	}
-	return true
+	return times[0] < times[1]
 }
 
-func (c *Validator) ValidateBeforeOrEqual(params validatorParams) bool {
-	return true
+func (c *Validator) ValidateBeforeOrEqual(params *validatorParams) bool {
+	err := c.requireParameterCount(1, params.params, "before_or_equal")
+	if err != nil {
+		fmt.Println(err)
+		return false
+	}
+	value := parseData(params.value)
+	paramDate := params.params[0]
+
+	times, err := parseStringsToDate(time_layout, []string{value, paramDate})
+	if err != nil {
+		return false
+	}
+	return times[0] <= times[1]
 }
 
-func (c *Validator) ValidateAfter(params validatorParams) bool {
-	return true
+func (c *Validator) ValidateAfter(params *validatorParams) bool {
+	err := c.requireParameterCount(1, params.params, "after")
+	if err != nil {
+		fmt.Println(err)
+		return false
+	}
+	value := parseData(params.value)
+	paramDate := params.params[0]
+
+	times, err := parseStringsToDate(time_layout, []string{value, paramDate})
+	if err != nil {
+		return false
+	}
+	return times[0] > times[1]
 }
 
-func (c *Validator) ValidateAfterOrEqual(params validatorParams) bool {
-	return true
+func (c *Validator) ValidateAfterOrEqual(params *validatorParams) bool {
+	err := c.requireParameterCount(1, params.params, "after_or_equal")
+	if err != nil {
+		fmt.Println(err)
+		return false
+	}
+	value := parseData(params.value)
+	paramDate := params.params[0]
+
+	times, err := parseStringsToDate(time_layout, []string{value, paramDate})
+	if err != nil {
+		return false
+	}
+	return times[0] >= times[1]
 }
 
-func (c *Validator) ValidateDate(params validatorParams) bool {
-	return true
+func (c *Validator) ValidateDate(params *validatorParams) bool {
+	params.params = []string{`^(\\d{4})(\\-)(\\d{2})(\\-)(\\d{2})(\\s+)(\\d{2})(\\:)(\\d{2})(\\:)(\\d{2})$`}
+	return c.ValidateMatch(params)
 }
 
-func (c *Validator) ValidateBoolean(params validatorParams) bool {
+func (c *Validator) ValidateBoolean(params *validatorParams) bool {
 
 	if GetInterfaceType(params.value) == "bool" {
 		return true
@@ -738,7 +821,10 @@ func (c *Validator) ValidateBoolean(params validatorParams) bool {
 	return false
 }
 
-func (c *Validator) ValidateJson(params validatorParams) bool {
+func (c *Validator) ValidateJson(params *validatorParams) bool {
+	if IsArray(params.value) {
+		return true
+	}
 	if GetInterfaceType(params.value) != "string" {
 		return false
 	}
@@ -750,7 +836,7 @@ func (c *Validator) ValidateJson(params validatorParams) bool {
 	return true
 }
 
-func (c *Validator) ValidateActiveUrl(params validatorParams) bool {
+func (c *Validator) ValidateActiveUrl(params *validatorParams) bool {
 	if GetInterfaceType(params.value) != "string" {
 		return false
 	}

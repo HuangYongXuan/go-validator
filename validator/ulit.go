@@ -1,8 +1,10 @@
 package validator
 
 import (
+	"errors"
 	"reflect"
 	"strings"
+	"time"
 )
 
 // snake string, XxYy to xx_yy , XxYY to xx_yy
@@ -98,4 +100,21 @@ func IsArray(param interface{}) bool {
 	}
 	ty := reflect.ValueOf(param).Kind().String()
 	return ty == "slice" || ty == "map"
+}
+
+func parseStringsToDate(layout string, dates []string) ([]int64, error) {
+	if len(dates) != 2 {
+		return []int64{}, errors.New("dates is not length to 2")
+	}
+
+	first, err := time.Parse(layout, dates[0])
+	if err != nil {
+		return []int64{}, err
+	}
+	end, err := time.Parse(layout, dates[1])
+	if err != nil {
+		return []int64{}, err
+	}
+
+	return []int64{first.Unix(), end.Unix()}, nil
 }
