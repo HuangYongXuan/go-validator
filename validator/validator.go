@@ -21,7 +21,7 @@ type Validator struct {
 	customNames    map[string]string
 }
 
-const time_layout = "2006-01-02 15:04:05"
+const timeLayout = "2006-01-02 15:04:05"
 
 type ruleStruct struct {
 	name  string
@@ -275,7 +275,6 @@ func (c *Validator) doReplacements(msg, name string, rule ruleParamsStruct) stri
 
 func (c *Validator) getAttr(name string) string {
 	attr := c.customNames[name]
-	fmt.Println("attr:", attr)
 	if attr != "" {
 		return attr
 	}
@@ -656,7 +655,7 @@ func (c *Validator) ValidateNotIn(params *validatorParams) bool {
 
 func (c *Validator) ValidateNumeric(params *validatorParams) bool {
 	if GetInterfaceType(params.value) == "string" {
-		params.params = []string{`^-?[1-9]\d*$`}
+		params.params = []string{`^[1-9]\d*\.\d*|0\.\d*[1-9]\d*$`}
 		result := c.ValidateMatch(params)
 		params.value, _ = strconv.ParseFloat(params.value.(string), 32)
 		return result
@@ -666,7 +665,7 @@ func (c *Validator) ValidateNumeric(params *validatorParams) bool {
 
 func (c *Validator) ValidateInteger(params *validatorParams) bool {
 	if GetInterfaceType(params.value) == "string" {
-		params.params = []string{`^[1-9]\d*\.\d*|0\.\d*[1-9]\d*$`}
+		params.params = []string{`^-?[1-9]\d*$`}
 		result := c.ValidateMatch(params)
 		params.value, _ = strconv.Atoi(params.value.(string))
 		return result
@@ -719,14 +718,14 @@ func parseData(date interface{}) string {
 	var value string
 	if InterfaceIsNumeric(date) {
 		timestamp := int64(date.(int))
-		value = time.Unix(timestamp, 0).Format(time_layout)
+		value = time.Unix(timestamp, 0).Format(timeLayout)
 	} else if GetInterfaceType(date) == "string" {
 		value = date.(string)
 		b, err := regexp.MatchString("^[1-9]\\d*$", value)
 		if err == nil && b == true {
 			timestamp, err := strconv.ParseInt(value, 10, 64)
 			if err == nil {
-				value = time.Unix(timestamp, 0).Format(time_layout)
+				value = time.Unix(timestamp, 0).Format(timeLayout)
 			}
 		}
 	} else {
@@ -744,7 +743,7 @@ func (c *Validator) ValidateBefore(params *validatorParams) bool {
 	value := parseData(params.value)
 	paramDate := params.params[0]
 
-	times, err := parseStringsToDate(time_layout, []string{value, paramDate})
+	times, err := parseStringsToDate(timeLayout, []string{value, paramDate})
 	if err != nil {
 		return false
 	}
@@ -760,7 +759,7 @@ func (c *Validator) ValidateBeforeOrEqual(params *validatorParams) bool {
 	value := parseData(params.value)
 	paramDate := params.params[0]
 
-	times, err := parseStringsToDate(time_layout, []string{value, paramDate})
+	times, err := parseStringsToDate(timeLayout, []string{value, paramDate})
 	if err != nil {
 		return false
 	}
@@ -776,7 +775,7 @@ func (c *Validator) ValidateAfter(params *validatorParams) bool {
 	value := parseData(params.value)
 	paramDate := params.params[0]
 
-	times, err := parseStringsToDate(time_layout, []string{value, paramDate})
+	times, err := parseStringsToDate(timeLayout, []string{value, paramDate})
 	if err != nil {
 		return false
 	}
@@ -792,7 +791,7 @@ func (c *Validator) ValidateAfterOrEqual(params *validatorParams) bool {
 	value := parseData(params.value)
 	paramDate := params.params[0]
 
-	times, err := parseStringsToDate(time_layout, []string{value, paramDate})
+	times, err := parseStringsToDate(timeLayout, []string{value, paramDate})
 	if err != nil {
 		return false
 	}
