@@ -142,7 +142,11 @@ func (c *Validator) passes() bool {
 			c.validate(name, rules)
 		}
 	}
-	return false
+	return c.isEmptyError()
+}
+
+func (c *Validator) isEmptyError() bool {
+	return len(c.errors) == 0
 }
 
 func (c *Validator) isEmptyValueAndContainsNullableRule(ruleStruct ruleStruct) bool {

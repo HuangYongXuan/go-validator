@@ -84,7 +84,7 @@ func TestValidateRequiredUnless(t *testing.T) {
 
 func TestValidateMatch(t *testing.T) {
 	data := make(map[string]interface{})
-	data["name"] = "18900000002"
+	data["name"] = "18900000001"
 
 	rules := make(map[string]interface{})
 	rules["name"] = []string{"nullable", "match:^1([38][0-9]|14[57]|5[^4])\\d{8}$"}
@@ -92,8 +92,10 @@ func TestValidateMatch(t *testing.T) {
 	customMessages := make(map[string]interface{})
 	customNames := make(map[string]string)
 	v := validator.MakeAndCustom(data, rules, customMessages, customNames)
-	v.Fails()
-	fmt.Println(v.GetErrors())
+	if v.Fails() {
+		err := v.GetErrors()
+		fmt.Println(err)
+	}
 }
 
 func TestValidateRegex(t *testing.T) {
