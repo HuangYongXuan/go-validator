@@ -664,7 +664,7 @@ func (c *Validator) ValidateNumeric(params *validatorParams) bool {
 		params.value, _ = strconv.ParseFloat(params.value.(string), 32)
 		return result
 	}
-	return InterfaceIsNumeric(params.params)
+	return InterfaceIsNumeric(params.value)
 }
 
 func (c *Validator) ValidateInteger(params *validatorParams) bool {
@@ -674,7 +674,7 @@ func (c *Validator) ValidateInteger(params *validatorParams) bool {
 		params.value, _ = strconv.Atoi(params.value.(string))
 		return result
 	}
-	return InterfaceIsInteger(params.params)
+	return InterfaceIsInteger(params.value)
 }
 
 func (c *Validator) ValidateString(params *validatorParams) bool {

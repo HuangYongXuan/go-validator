@@ -236,7 +236,7 @@ func TestValidateNumeric(t *testing.T) {
 
 func TestValidateInteger(t *testing.T) {
 	data := make(map[string]interface{})
-	data["name"] = 's'
+	data["name"] = 1
 	rules := make(map[string]interface{})
 	rules["name"] = []string{"required", "integer"}
 
