@@ -236,7 +236,7 @@ func TestValidateNumeric(t *testing.T) {
 
 func TestValidateInteger(t *testing.T) {
 	data := make(map[string]interface{})
-	data["name"] = 1
+	data["name"] = float32(1.001)
 	rules := make(map[string]interface{})
 	rules["name"] = []string{"required", "integer"}
 
@@ -406,4 +406,10 @@ func TestValidateActiveUrl(t *testing.T) {
 	v := validator.MakeAndCustom(data, rules, customMessages, customNames)
 	v.Fails()
 	fmt.Println(v.GetErrors())
+}
+
+func TestToString(t *testing.T) {
+	var data uint8 = 12
+
+	fmt.Println(validator.ToString(data))
 }

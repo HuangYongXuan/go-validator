@@ -658,6 +658,8 @@ func (c *Validator) ValidateNotIn(params *validatorParams) bool {
 }
 
 func (c *Validator) ValidateNumeric(params *validatorParams) bool {
+	params.value = ToString(params.value)
+
 	if GetInterfaceType(params.value) == "string" {
 		params.params = []string{`^[1-9]\d*\.\d*|0\.\d*[1-9]\d*$`}
 		result := c.ValidateMatch(params)
@@ -668,10 +670,11 @@ func (c *Validator) ValidateNumeric(params *validatorParams) bool {
 }
 
 func (c *Validator) ValidateInteger(params *validatorParams) bool {
+	params.value = ToString(params.value)
+
 	if GetInterfaceType(params.value) == "string" {
 		params.params = []string{`^-?[1-9]\d*$`}
 		result := c.ValidateMatch(params)
-		params.value, _ = strconv.Atoi(params.value.(string))
 		return result
 	}
 	return InterfaceIsInteger(params.value)

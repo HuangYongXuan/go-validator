@@ -2,6 +2,7 @@ package validator
 
 import (
 	"errors"
+	"fmt"
 	"reflect"
 	"strings"
 	"time"
@@ -117,4 +118,8 @@ func parseStringsToDate(layout string, dates []string) ([]int64, error) {
 	}
 
 	return []int64{first.Unix(), end.Unix()}, nil
+}
+
+func ToString(data interface{}) string {
+	return fmt.Sprintf("%v", data)
 }
