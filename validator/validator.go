@@ -299,12 +299,16 @@ func (c *Validator) getErrorMessage(name string, rule ruleParamsStruct) string {
 }
 
 func (c *Validator) getErrorMessages(key, name string, messages map[string]interface{}) (string, bool) {
-	if GetInterfaceType(messages[key]) == "string" {
+	var _type = GetInterfaceType(messages[key])
+	if _type == "string" {
 		message, ok := messages[key].(string)
 		if ok {
 			return message, true
 		}
-	} else if IsArray(messages[key]) {
+	} else if IsArray(messages[key]) || key == "min" {
+		if _, ok := messages[key].(map[string]string); !ok {
+			return "", false
+		}
 		msg := messages[key].(map[string]string)
 		value := c.data[name]
 
@@ -316,8 +320,11 @@ func (c *Validator) getErrorMessages(key, name string, messages map[string]inter
 			return msg["array"], true
 		} else if GetInterfaceType(value) == "string" {
 			return msg["string"], true
+		} else {
+			return msg["string"], true
 		}
 	}
+
 	return "", false
 }
 

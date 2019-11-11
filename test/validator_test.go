@@ -188,7 +188,15 @@ func TestValidateBetween(t *testing.T) {
 }
 
 func TestValidateMin(t *testing.T) {
-	// TODO
+	data := make(map[string]interface{})
+	rules := make(map[string]interface{})
+	rules["password"] = []string{"required", "min:11", "max:100"}
+
+	customMessages := make(map[string]interface{})
+	customNames := make(map[string]string)
+	v := validator.MakeAndCustom(data, rules, customMessages, customNames)
+	v.Fails()
+	fmt.Println(v.GetErrors())
 }
 
 func TestValidateMax(t *testing.T) {
