@@ -169,30 +169,19 @@ func (c *Validator) hasData(name string) bool {
 }
 
 func (c *Validator) hasRule(name string, rules []string) bool {
-	rule := c.getRule(name, rules)
-	return !reflect.DeepEqual(rule, []ruleParamsStruct{})
+	var hasIndex = 0
+	for _, rule := range c.getRule(name) {
+		for _, ruleStr := range rules {
+			if rule.name == ruleStr {
+				hasIndex++
+			}
+		}
+	}
+	return hasIndex == len(rules)
 }
 
-func (c *Validator) getRule(name string, rulesToCheck []string) []ruleParamsStruct {
-	var rule []ruleParamsStruct
-	for name, value := range c.rules {
-		if name == name {
-			rule = value
-			break
-		}
-	}
-	if reflect.DeepEqual(rule, []ruleParamsStruct{}) {
-		return []ruleParamsStruct{}
-	}
-
-	for _, value := range rule {
-		b, _ := StringArrayIndex(rulesToCheck, value.name)
-		if !b {
-			continue
-		}
-	}
-
-	return rule
+func (c *Validator) getRule(name string) []ruleParamsStruct {
+	return c.rules[name]
 }
 
 func (c *Validator) requireParameterCount(count int, params []string, rule string) error {
@@ -300,9 +289,17 @@ func (c *Validator) getErrorMessages(key, name string, messages map[string]inter
 		}
 		msg := messages[key].(map[string]string)
 		value := c.data[name]
-
+		fmt.Println(c.rules[name])
 		if InterfaceIsInteger(value) {
 			return msg["numeric"], true
+		} else if c.hasRule(name, []string{"Integer"}) {
+			return msg["numeric"], true
+		} else if c.hasRule(name, []string{"Numeric"}) {
+			return msg["numeric"], true
+		} else if c.hasRule(name, []string{"Array"}) {
+			return msg["array"], true
+		} else if c.hasRule(name, []string{"String"}) {
+			return msg["string"], true
 		} else if InterfaceIsNumeric(value) {
 			return msg["numeric"], true
 		} else if IsArray(value) {
