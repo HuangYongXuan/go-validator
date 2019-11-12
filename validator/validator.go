@@ -15,18 +15,15 @@ import (
 
 type Validator struct {
 	data           map[string]interface{}
-	rules          []ruleStruct
+	rules          Rules
 	errors         map[string]interface{}
 	customMessages map[string]interface{}
 	customNames    map[string]string
 }
 
-const timeLayout = "2006-01-02 15:04:05"
+type Rules map[string][]ruleParamsStruct
 
-type ruleStruct struct {
-	name  string
-	rules []ruleParamsStruct
-}
+const timeLayout = "2006-01-02 15:04:05"
 
 type ruleParamsStruct struct {
 	name   string
@@ -64,7 +61,8 @@ func init() {
 func MakeAndCustom(data map[string]interface{}, rules map[string]interface{}, customMessages map[string]interface{}, customNames map[string]string) Validator {
 	var validator Validator
 	validator.data = data
-	validator.rules = validator.parseRules(rules)
+	validator.rules = make(Rules)
+	validator.parseRules(rules)
 	validator.customMessages = customMessages
 	validator.customNames = customNames
 	return validator
@@ -73,26 +71,19 @@ func MakeAndCustom(data map[string]interface{}, rules map[string]interface{}, cu
 func Make(data map[string]interface{}, rules map[string]interface{}) Validator {
 	var validator Validator
 	validator.data = data
-	validator.rules = validator.parseRules(rules)
+	validator.rules = make(Rules)
+	validator.parseRules(rules)
 	return validator
 }
 
-func (c *Validator) parseRules(rules map[string]interface{}) []ruleStruct {
-	var arr []ruleStruct
+func (c *Validator) parseRules(rules map[string]interface{}) {
 	for k, v := range rules {
 		if GetInterfaceType(v) == "[]string" {
-			arr = append(arr, ruleStruct{
-				name:  k,
-				rules: c.parseItemRulesArray(v.([]string)),
-			})
+			c.rules[k] = c.parseItemRulesArray(v.([]string))
 		} else {
-			arr = append(arr, ruleStruct{
-				name:  k,
-				rules: c.parseItemRules(v.(string)),
-			})
+			c.rules[k] = c.parseItemRules(v.(string))
 		}
 	}
-	return arr
 }
 
 func (c *Validator) parseItemRules(itemRules string) []ruleParamsStruct {
@@ -130,12 +121,12 @@ func (*Validator) titleCase(str string) string {
 func (c *Validator) passes() bool {
 	c.errors = make(map[string]interface{})
 
-	for _, rule := range c.rules {
-		var name = rule.name
-		if c.isEmptyValueAndContainsNullableRule(rule) {
+	for name, rule := range c.rules {
+		if c.isEmptyValueAndContainsNullableRule(name, rule) {
 			continue
 		}
-		for _, rules := range rule.rules {
+		//var name
+		for _, rules := range rule {
 			if rules.name == "Nullable" {
 				continue
 			}
@@ -149,10 +140,10 @@ func (c *Validator) isEmptyError() bool {
 	return len(c.errors) == 0
 }
 
-func (c *Validator) isEmptyValueAndContainsNullableRule(ruleStruct ruleStruct) bool {
-	value := c.getValue(ruleStruct.name)
-	hasNullable := c.hasNullable(ruleStruct.rules)
-	return value == nil && hasNullable
+func (c *Validator) isEmptyValueAndContainsNullableRule(name string, rule []ruleParamsStruct) bool {
+	value := c.getValue(name)
+	hasNullable := c.hasNullable(rule)
+	return (value == nil || value == "") && hasNullable
 }
 
 func (c *Validator) hasNullable(paramsStruct []ruleParamsStruct) bool {
@@ -179,31 +170,29 @@ func (c *Validator) hasData(name string) bool {
 
 func (c *Validator) hasRule(name string, rules []string) bool {
 	rule := c.getRule(name, rules)
-	return !reflect.DeepEqual(rule, ruleStruct{})
+	return !reflect.DeepEqual(rule, []ruleParamsStruct{})
 }
 
-func (c *Validator) getRule(name string, rulesToCheck []string) ruleStruct {
-	var rule ruleStruct
-	for _, value := range c.rules {
-		if value.name == name {
+func (c *Validator) getRule(name string, rulesToCheck []string) []ruleParamsStruct {
+	var rule []ruleParamsStruct
+	for name, value := range c.rules {
+		if name == name {
 			rule = value
 			break
 		}
 	}
-	if reflect.DeepEqual(rule, ruleStruct{}) {
-		return ruleStruct{}
+	if reflect.DeepEqual(rule, []ruleParamsStruct{}) {
+		return []ruleParamsStruct{}
 	}
 
-	var rules ruleStruct
-	rules.name = rule.name
-	for _, value := range rule.rules {
+	for _, value := range rule {
 		b, _ := StringArrayIndex(rulesToCheck, value.name)
-		if b {
-			rules.rules = append(rules.rules, value)
+		if !b {
+			continue
 		}
 	}
 
-	return rules
+	return rule
 }
 
 func (c *Validator) requireParameterCount(count int, params []string, rule string) error {
