@@ -814,7 +814,7 @@ func (c *Validator) ValidateBoolean(params *validatorParams) bool {
 	}
 	if GetInterfaceType(params.value) == "string" {
 		str := params.value.(string)
-		b, _ := StringArrayIndex([]string{"0", "1"}, str)
+		b, _ := StringArrayIndex([]string{"0", "1", "true", "false"}, str)
 		return b
 	}
 	return false
