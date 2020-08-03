@@ -289,7 +289,6 @@ func (c *Validator) getErrorMessages(key, name string, messages map[string]inter
 		}
 		msg := messages[key].(map[string]string)
 		value := c.data[name]
-		fmt.Println(c.rules[name])
 		if InterfaceIsInteger(value) {
 			return msg["numeric"], true
 		} else if c.hasRule(name, []string{"Integer"}) {
@@ -623,11 +622,14 @@ func (c *Validator) getSize(name string, value interface{}) int {
 		return value.(int)
 	} else if IsArray(value) {
 		size := 0
-		switch GetInterfaceType(value) {
+		var valType = GetInterfaceType(value)
+		switch valType {
 		case "[]string":
 			size = len(value.([]string))
 		case "[]int":
 			size = len(value.([]int))
+		case "[]interface {}":
+			size = len(value.([]interface{}))
 		}
 		return size
 	} else if GetInterfaceType(value) == "string" {

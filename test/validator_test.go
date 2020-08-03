@@ -127,9 +127,9 @@ func TestValidateAccepted(t *testing.T) {
 
 func TestValidateArray(t *testing.T) {
 	data := make(map[string]interface{})
-	data["name"] = []int{}
+	data["name"] = []interface{}{"122"}
 	rules := make(map[string]interface{})
-	rules["name"] = []string{"nullable", "array"}
+	rules["name"] = []string{"nullable", "array", "min:2"}
 
 	customMessages := make(map[string]interface{})
 	customNames := make(map[string]string)
