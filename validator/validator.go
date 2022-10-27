@@ -619,7 +619,7 @@ func (c *Validator) ValidateMax(params *validatorParams) bool {
 
 func (c *Validator) getSize(name string, value interface{}) int {
 	if InterfaceIsInteger(value) {
-		return value.(int)
+		return InterInterfaceTOInt(value)
 	} else if IsArray(value) {
 		size := 0
 		var valType = GetInterfaceType(value)
@@ -634,6 +634,8 @@ func (c *Validator) getSize(name string, value interface{}) int {
 		return size
 	} else if GetInterfaceType(value) == "string" {
 		return len(value.(string))
+	} else {
+		return value.(int)
 	}
 	return 0
 }
@@ -708,7 +710,8 @@ func (c *Validator) ValidateAlphaNum(params *validatorParams) bool {
 	return c.ValidateMatch(params)
 }
 
-/**
+/*
+*
 验证属性是否仅包含字母数字字符，短划线和下划线。
 */
 func (c *Validator) ValidateAlphaDash(params *validatorParams) bool {

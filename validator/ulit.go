@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -77,10 +78,56 @@ func InterfaceIsInteger(param interface{}) bool {
 		return false
 	}
 
-	types := []string{"uint8", "uint16", "uint32", "uint64", "int8", "int16", "int32", "int64", "int", "uint"}
+	types := []string{"uint8", "uint16", "uint32", "uint64", "int8", "int16", "int32", "int64", "int", "uint", "float32", "float64"}
 	valType := GetInterfaceType(param)
 	b, _ := StringArrayIndex(types, valType)
 	return b
+}
+
+func InterInterfaceTOInt(val interface{}) int {
+	var t2 int
+	switch val.(type) {
+	case uint:
+		t2 = int(val.(uint))
+		break
+	case int8:
+		t2 = int(val.(int8))
+		break
+	case uint8:
+		t2 = int(val.(uint8))
+		break
+	case int16:
+		t2 = int(val.(int16))
+		break
+	case uint16:
+		t2 = int(val.(uint16))
+		break
+	case int32:
+		t2 = int(val.(int32))
+		break
+	case uint32:
+		t2 = int(val.(uint32))
+		break
+	case int64:
+		t2 = int(val.(int64))
+		break
+	case uint64:
+		t2 = int(val.(uint64))
+		break
+	case float32:
+		t2 = int(val.(float32))
+		break
+	case float64:
+		t2 = int(val.(float64))
+		break
+	case string:
+		t2, _ = strconv.Atoi(val.(string))
+		break
+	default:
+		t2 = val.(int)
+		break
+	}
+	return t2
 }
 
 func InterfaceIsNumeric(param interface{}) bool {
